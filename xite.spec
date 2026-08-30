@@ -44,5 +44,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='xite.ico'  # optional – add your own .ico, else remove this line
+    icon='icons/xpp.ico'  # X++ v0.4.1 logo
 )

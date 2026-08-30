@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Xite v0.3
+Xite v0.4.1
 Minimalist native editor for X++ (.xp)
 - Dark, distraction-free UI
 - File explorer
@@ -423,7 +423,7 @@ class FileTree(ttk.Frame):
 class XiteIDE(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("Xite • v0.3")
+        self.title("Xite • v0.4.1")
         self.geometry("1280x800")
         self.configure(bg=DARK["bg"])
         try:
@@ -485,7 +485,7 @@ class XiteIDE(tk.Tk):
                  font=("Segoe UI", 8)).pack(anchor="w")
         self.mode_var = tk.StringVar(value="XITR")
         mode_combo = ttk.Combobox(mode_frame, textvariable=self.mode_var,
-                                  values=["XITR","XCOM","ITR","AI"],
+                                  values=["ZITR","ZCOM","ZJIT","XITR","XCOM","ITR","AI"],
                                   width=6, state="readonly", font=("Segoe UI", 9))
         mode_combo.pack()
 
@@ -555,7 +555,7 @@ class XiteIDE(tk.Tk):
         status = ttk.Frame(self, style="Sidebar.TFrame", height=26)
         status.pack(side="bottom", fill="x")
         status.pack_propagate(False)
-        self.status_left = ttk.Label(status, text="ready • Xite v0.3 – X++", style="Status.TLabel")
+        self.status_left = ttk.Label(status, text="ready • Xite v0.4.1 – X++", style="Status.TLabel")
         self.status_left.pack(side="left", padx=12)
         self.status_right = ttk.Label(status, text="Ln 1, Col 1  •  UTF-8  •  .xp", style="Status.TLabel")
         self.status_right.pack(side="right", padx=12)
@@ -580,7 +580,7 @@ class XiteIDE(tk.Tk):
         try:
             idx = self.editor.text.index("insert")
             line, col = idx.split(".")
-            self.status_right.configure(text=f"Ln {line}, Col {int(col)+1}  •  {self.mode_var.get()}  •  Xite v0.3 – X++")
+            self.status_right.configure(text=f"Ln {line}, Col {int(col)+1}  •  {self.mode_var.get()}  •  Xite v0.4.1 – X++")
         except Exception:
             pass
         self.after(180, self._tick)
@@ -615,7 +615,7 @@ class XiteIDE(tk.Tk):
             m = re.search(r'RNM\s*=\s*(\w+)', txt, re.I)
             if m:
                 mode = m.group(1).upper()
-                if mode in ("XCOM","XITR","ITR","AI"):
+                if mode in ("ZCOM","ZITR","ZJIT","XCOM","XITR","ITR","AI"):
                     self.mode_var.set(mode if mode!="AI" else "ITR")
         except Exception as e:
             messagebox.showerror("Open failed", str(e))
@@ -652,7 +652,7 @@ class XiteIDE(tk.Tk):
     def _update_title(self):
         name = os.path.basename(self.current_file) if self.current_file else "untitled.xp"
         if self.dirty: name = "• " + name
-        self.title(f"{name} — Xite v0.3 – X++")
+        self.title(f"{name} — Xite v0.4.1 – X++")
 
     # ---------- run ----------
     def run_file(self):
@@ -769,7 +769,7 @@ class XiteIDE(tk.Tk):
                 self.status_left.configure(foreground=DARK["error"])
             else:
                 self.status_left.configure(foreground=DARK["muted"])
-            self.after(3500, lambda: self.status_left.configure(text=f"Xite v0.3 – X++ • {self.mode_var.get()}", foreground=DARK["muted"]))
+            self.after(3500, lambda: self.status_left.configure(text=f"Xite v0.4.1 – X++ • {self.mode_var.get()}", foreground=DARK["muted"]))
         self.after(0, _set)
 
 

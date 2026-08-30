@@ -1,4 +1,4 @@
-RNM=XITR
+RNM=ZITR
 nums = [1,2,3]
 push 4 to nums
 loop n in nums:

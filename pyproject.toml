@@ -1,7 +1,7 @@
 [project]
 name = "xpp-lang"
-version = "0.3.1"
-description = "X++ (XPlusPlus) v0.3 – strict pseudocode compiler + Xite IDE + AI intent fallback"
+version = "0.4.1"
+description = "X++ (XPlusPlus) v0.4.1 – pseudocode compiler + native VM (ZCOM/ZITR/ZJIT) + Xite IDE + AI intent fallback"
 authors = [{name="Aagastya Verma", email="aagastyaverma6-sys@github"}]
 readme = "README.md"
 requires-python = ">=3.9"

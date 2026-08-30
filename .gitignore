@@ -1,0 +1,22 @@
+# X++ v0.4.1 native build artifacts
+/xppvm
+/xppvm.exe
+/zjit_runtime.hpp
+/build/
+*.xbc
+*.zexe
+*.zexe.stamp
+*.src.cpp
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store
+*.egg-info/

@@ -2,7 +2,7 @@
 # Run on Windows: python build_exe.py
 import PyInstaller.__main__, sys, os
 # icon optional
-icon = "xite.ico" if os.path.exists("xite.ico") else None
+icon = "icons/xpp.ico" if os.path.exists("icons/xpp.ico") else None
 args = [
     "xite.py",
     "--name=Xite",
@@ -13,6 +13,7 @@ args = [
     "--collect-all=lark",
     "--add-data=xpp_core;xpp_core",
     "--add-data=examples;examples",
+    "--add-data=icons;icons",
 ]
 if icon: args.append(f"--icon={icon}")
 # version info

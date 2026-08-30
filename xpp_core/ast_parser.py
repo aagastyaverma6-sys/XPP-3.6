@@ -1,4 +1,5 @@
-from lark import Lark
+# X++ strict AST validator (Lark) – lark is loaded lazily so native
+# (ZCOM/ZITR/ZJIT) and legacy fast paths never require it.
 _grammar = r"""
 ?start: stmt*
 ?stmt: func_def | if_stmt | while_stmt | for_range | for_each | try_stmt | return_stmt | break_stmt | continue_stmt | print_stmt | push_stmt | assign_stmt | expr_stmt | NEWLINE
@@ -43,7 +44,12 @@ block: stmt+
 %ignore /#[^\n]*/
 NEWLINE: /(\r?\n)+/
 """
-_parser = Lark(_grammar, parser="lalr", propagate_positions=True, cache=True)
+
+
 def parse(src: str):
-    if not src.endswith("\n"): src += "\n"
-    return _parser.parse(src.replace("\r\n","\n"))
+    from lark import Lark  # lazy: only needed for --strict-ast
+
+    parser = Lark(_grammar, parser="lalr", propagate_positions=True, cache=True)
+    if not src.endswith("\n"):
+        src += "\n"
+    return parser.parse(src.replace("\r\n", "\n"))
