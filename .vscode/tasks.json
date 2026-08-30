@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "X++: run file (native VM)",
+      "type": "shell",
+      "command": "x run \"${file}\"",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "X++: run file (native AOT)",
+      "type": "shell",
+      "command": "x run \"${file}\" --mode ZJIT",
+      "group": "build",
+      "problemMatcher": []
+    }
+  ]
+}

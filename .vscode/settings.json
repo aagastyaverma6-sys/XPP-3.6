@@ -1,0 +1,6 @@
+{
+  "files.associations": { "*.xp": "xpp" },
+  "workbench.iconTheme": "xpp-file-icons",
+  "code-runner.executorMap": { ".xp": "x run \"$fullFileName\"" },
+  "code-runner.runInTerminal": true
+}

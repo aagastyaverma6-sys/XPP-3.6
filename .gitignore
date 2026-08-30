@@ -15,7 +15,9 @@ __pycache__/
 venv/
 
 # IDE / OS
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
 .idea/
 Thumbs.db
 .DS_Store
