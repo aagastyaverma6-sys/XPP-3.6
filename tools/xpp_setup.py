@@ -153,13 +153,14 @@ def build_native():
     banner("native VM (xppvm)")
     g = find_gxx()
     if IS_WIN:
-        if not g:
-            warn("no C++ compiler (g++) found. Run setup.bat again after "
-                 "MinGW/MSYS2 installs, or install: winget install MSYS2.MSYS2")
-            return False
         env = os.environ.copy()
-        env["PATH"] = os.path.dirname(g) + os.pathsep + env["PATH"]
-        r = sh([str(ROOT / "build_xppvm.bat")], cwd=ROOT, env=env)
+        if g:
+            env["PATH"] = os.path.dirname(g) + os.pathsep + env["PATH"]
+        # Run the batch through cmd.exe with a quoted path. This avoids cmd
+        # matching the `)` in folder names such as "AAV (Aagastya Verma)".
+        bat = str(ROOT / "build_xppvm.bat")
+        r = sh([os.environ.get("COMSPEC", "cmd.exe"), "/c", bat],
+               cwd=ROOT, env=env)
         ok = r is not None and r.returncode == 0
     else:
         cxx = "clang++" if IS_MAC else os.environ.get("CXX", "g++")

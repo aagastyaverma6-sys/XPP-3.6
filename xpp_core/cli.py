@@ -45,9 +45,12 @@ def build_native(verbose=False):
         print("[Z] no xppvm found – building native VM...", file=sys.stderr)
     try:
         if os.name == "nt":
+            # Invoke through cmd.exe /c and let subprocess quote the path, so
+            # folder names containing parentheses are handled correctly.
             subprocess.run(
-                [os.path.join(REPO_ROOT, "build_xppvm.bat")],
-                cwd=REPO_ROOT, shell=True, check=True,
+                [os.environ.get("COMSPEC", "cmd.exe"), "/c",
+                 os.path.join(REPO_ROOT, "build_xppvm.bat")],
+                cwd=REPO_ROOT, check=True,
             )
             return os.path.join(REPO_ROOT, "build", "xppvm.exe")
         subprocess.run(["make", "-C", os.path.join(REPO_ROOT, "native")],
