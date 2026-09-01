@@ -494,10 +494,22 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--all", action="store_true", help="run every step")
     ap.add_argument("--no-vscode", action="store_true")
+    ap.add_argument("--shim", action="store_true",
+                    help="only install/refresh the x/xpp/xite commands (fast)")
+    ap.add_argument("--verify", action="store_true",
+                    help="only check that x/xppvm work")
     args = ap.parse_args()
 
     print("\nX++ v0.4.1 universal setup   (repo: " + str(ROOT) + ")")
     print("Platform: " + platform.platform())
+
+    if args.shim:
+        install_x_shim()
+        verify_install()
+        return
+    if args.verify:
+        verify_install()
+        return
 
     install_python_pkg()
     if build_native():
