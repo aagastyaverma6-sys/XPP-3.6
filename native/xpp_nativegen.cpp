@@ -378,13 +378,17 @@ bool zjit_build(const std::string& src_path, const std::string& out_exe,
     std::string cc;
     if (!find_compiler(&cc)) {
         if (err) *err = "no C++ compiler found (install g++ or clang++)";
-        std::remove(tmp.c_str());
+        std::error_code _ec;
+        std::filesystem::remove(tmp, _ec);
         return false;
     }
     std::string cmd = cc + " -O2 -std=c++17 -w \"" + tmp.string() + "\" -o \"" + out_exe + "\"";
     if (verbose) fprintf(stderr, "[ZJIT] %s\n", cmd.c_str());
     int rc = std::system(cmd.c_str());
-    if (getenv("XPP_ZJIT_KEEP_SRC") == nullptr) std::remove(tmp.c_str());
+    if (getenv("XPP_ZJIT_KEEP_SRC") == nullptr) {
+        std::error_code _ec;
+        std::filesystem::remove(tmp, _ec);
+    }
     if (rc != 0) {
         if (err) *err = "native compile failed (is a C++ compiler installed?)";
         return false;
