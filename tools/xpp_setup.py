@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-X++ v0.4.1 – one-shot setup engine (cross platform).
+X++ v0.4.1 - one-shot setup engine (cross platform).
 
 Run through setup.bat / setup.sh (or directly: python3 tools/xpp_setup.py --all)
 
@@ -34,7 +34,7 @@ HOME = Path.home()
 
 def banner(msg):
     print("\n" + "=" * 68)
-    print("  X++ v0.4.1 SETUP  •  " + msg)
+    print("  X++ v0.4.1 SETUP  *  " + msg)
     print("=" * 68)
 
 
@@ -76,7 +76,7 @@ def install_python_pkg():
             ok = True
             break
     if not ok:
-        warn("pip editable install failed – writing a direct `x` shim instead; "
+        warn("pip editable install failed - writing a direct `x` shim instead; "
              "the VM still works via xppvm.")
     install_x_shim()
     # best-effort optional deps (lark = --strict-ast, requests = ITR/AI mode)
@@ -174,7 +174,7 @@ def install_binary():
     src = ROOT / ("build/xppvm.exe" if IS_WIN else "xppvm")
     runtime = NATIVE / "zjit_runtime.hpp"
     if not src.exists():
-        warn(f"xppvm binary not found at {src} – skipping install")
+        warn(f"xppvm binary not found at {src} - skipping install")
         return
 
     targets = []
@@ -293,7 +293,7 @@ def install_vscode():
     banner("VS Code integration (file icons + run button)")
     code = find_code()
     if not code:
-        warn("VS Code not found – syntax highlighting + file icons will be "
+        warn("VS Code not found - syntax highlighting + file icons will be "
              "picked up automatically when VS Code is installed later "
              "(rerun setup after installing VS Code).")
         return
@@ -305,7 +305,7 @@ def install_vscode():
     # Code Runner -> the Run button
     r = sh([code, "--install-extension", "formulahendry.code-runner", "--force"])
     if r is None or r.returncode != 0:
-        warn("could not install Code Runner (Run button) – rerun later or "
+        warn("could not install Code Runner (Run button) - rerun later or "
              "install 'Code Runner' from the marketplace manually")
 
     udir = vscode_user_dir()
@@ -515,7 +515,7 @@ def main():
     if build_native():
         install_binary()
     else:
-        warn("xppvm not built – legacy XCOM/XITR still work; ZJIT needs g++/clang")
+        warn("xppvm not built - legacy XCOM/XITR still work; ZJIT needs g++/clang")
 
     if not args.no_vscode:
         install_vscode()
