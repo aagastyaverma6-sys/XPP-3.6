@@ -89,34 +89,39 @@ def install_python_pkg():
 
 
 def install_x_shim():
-    """Guarantee `x` works even when pip/network is unavailable."""
-    if _has_installed_x():
-        return
+    """Guarantee `x`/`xpp`/`xite` work even when pip/network is unavailable.
+
+    The shim is always (re)written so it points at *this* checkout and at
+    the Python interpreter that is actually running setup.
+    """
     if IS_WIN:
         bin_dir = HOME / ".xpp" / "bin"
         bin_dir.mkdir(parents=True, exist_ok=True)
-        py = shutil.which("python") or sys.executable
-        shim = bin_dir / "x.cmd"
-        shim.write_text(
-            '@echo off\r\n'
-            f'set "PYTHONPATH={ROOT};%PYTHONPATH%"\r\n'
-            f'"{py}" -m xpp_core.cli %*\r\n',
-            encoding="utf-8")
+        py = sys.executable
+        for name in ("x", "xpp", "xite"):
+            shim = bin_dir / (name + ".cmd")
+            shim.write_text(
+                '@echo off\r\n'
+                f'set "PYTHONPATH={ROOT};%PYTHONPATH%"\r\n'
+                f'set "PYTHONUNBUFFERED=1"\r\n'
+                f'"{py}" -m xpp_core.cli %*\r\n',
+                encoding="utf-8")
+            note(f"{name} shim: {shim}")
         add_windows_path(str(bin_dir))
-        note(f"x shim: {shim}")
     else:
         bin_dir = HOME / ".local" / "bin"
         bin_dir.mkdir(parents=True, exist_ok=True)
-        shim = bin_dir / "x"
-        py = shutil.which("python3") or sys.executable
-        shim.write_text(
-            '#!/bin/sh\n'
-            f'export PYTHONPATH="{ROOT}:${{PYTHONPATH:-}}"\n'
-            f'exec "{py}" -m xpp_core.cli "$@"\n',
-            encoding="utf-8")
-        shim.chmod(0o755)
+        py = sys.executable
+        for name in ("x", "xpp", "xite"):
+            shim = bin_dir / name
+            shim.write_text(
+                '#!/bin/sh\n'
+                f'export PYTHONPATH="{ROOT}:${{PYTHONPATH:-}}"\n'
+                f'exec "{py}" -m xpp_core.cli "$@"\n',
+                encoding="utf-8")
+            shim.chmod(0o755)
+            note(f"{name} shim: {shim}")
         add_shell_path(str(bin_dir))
-        note(f"x shim: {shim}")
 
 
 def _x_script_dir():
@@ -231,10 +236,15 @@ def add_windows_path(path):
         cur, _ = winreg.QueryValueEx(k, "Path")
     except OSError:
         cur = ""
-    if path.lower() in cur.lower():
+    # Put the X++ bin dir at the front so the fresh x.cmd / xppvm.cmd shims
+    # win over any older x.exe/xite.exe already on PATH.
+    parts = [p for p in cur.split(";") if p and p.lower() != path.lower()]
+    new = path + ((";" + ";".join(parts)) if parts else "")
+    if new.lower() == cur.lower():
         note("Windows PATH already registered")
-        return
-    winreg.SetValueEx(k, "Path", 0, winreg.REG_EXPAND_SZ, cur + ";" + path)
+    else:
+        winreg.SetValueEx(k, "Path", 0, winreg.REG_EXPAND_SZ, new)
+        note("Windows user PATH updated (restart terminals / VS Code)")
     winreg.CloseKey(k)
     # notify running processes
     try:
@@ -437,6 +447,46 @@ def install_macos_app():
     note("macOS handler app 'X++ Files' registered (Finder shows the logo for .xp)")
 
 
+def _run_show(cls_cmd):
+    try:
+        if IS_WIN:
+            r = subprocess.run([os.environ.get("COMSPEC", "cmd.exe"), "/c",
+                                *(str(c) for c in cls_cmd)],
+                               capture_output=True, text=True, timeout=10)
+        else:
+            r = subprocess.run([str(c) for c in cls_cmd],
+                               capture_output=True, text=True, timeout=10)
+        out = (r.stdout or "").strip() or (r.stderr or "").strip()
+        return out or ("(no output)" if r.returncode == 0 else f"(exit {r.returncode})")
+    except Exception as e:
+        return f"(could not run: {e})"
+
+
+def verify_install():
+    """Check that the x / xppvm commands actually work from a fresh shell."""
+    banner("VERIFY")
+    if IS_WIN:
+        bin_dir = HOME / ".xpp" / "bin"
+    else:
+        bin_dir = HOME / ".local" / "bin"
+
+    x = bin_dir / ("x.cmd" if IS_WIN else "x")
+    if not x.exists():
+        warn(f"x command was not created at {x}")
+    else:
+        out = _run_show([x, "version"])
+        print(f"  x       -> {x}")
+        print(f"  x check -> {out}")
+
+    xppvm = bin_dir / ("xppvm.exe" if IS_WIN else "xppvm")
+    if not xppvm.exists():
+        warn(f"xppvm was not installed at {xppvm}")
+    else:
+        out = _run_show([xppvm, "version"])
+        print(f"  xppvm   -> {xppvm}")
+        print(f"  xppvm check -> {out}")
+
+
 # --------------------------------------------------------------------------
 # main
 # --------------------------------------------------------------------------
@@ -465,6 +515,7 @@ def main():
     else:
         install_linux_icons()
 
+    verify_install()
     banner("DONE")
     x = shutil.which("x") or (_x_script_dir() / "x" if _x_script_dir() else None)
     print("""

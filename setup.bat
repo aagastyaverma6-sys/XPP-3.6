@@ -1,6 +1,6 @@
 @echo off
 setlocal EnableExtensions EnableDelayedExpansion
-title X++ v0.4.1 – ONE-CLICK SETUP
+title X++ v0.4.1 SETUP
 color 0B
 cd /d "%~dp0"
 
@@ -45,6 +45,7 @@ if errorlevel 1 (
 call :find_python
 if not defined PYTHON_CMD (
   echo  [X] Python still missing. Please install it from python.org and rerun.
+  pause
   exit /b 1
 )
 :python_ok
@@ -108,6 +109,30 @@ if errorlevel 1 (
   exit /b 1
 )
 
+rem ------------------------------------------------------------
+rem  verify that x actually works from the shim path
+rem ------------------------------------------------------------
+echo.
+echo  [CHECK] Verifying install...
+set "XPP_BIN=%USERPROFILE%\.xpp\bin"
+if exist "%XPP_BIN%\x.cmd" goto check_x
+echo  [X] x command missing at %XPP_BIN%\x.cmd
+goto check_xppvm
+
+:check_x
+echo  [OK]  x.cmd: %XPP_BIN%\x.cmd
+"%XPP_BIN%\x.cmd" version
+
+:check_xppvm
+if exist "%XPP_BIN%\xppvm.exe" goto check_xppvm_ok
+echo  [i]  xppvm.exe not found in %XPP_BIN% (native VM may not have built; legacy modes still work)
+goto done_checks
+
+:check_xppvm_ok
+echo  [OK]  xppvm.exe: %XPP_BIN%\xppvm.exe
+"%XPP_BIN%\xppvm.exe" version
+
+:done_checks
 echo.
 echo ============================================================
 echo   DONE! Open a NEW terminal and type:
