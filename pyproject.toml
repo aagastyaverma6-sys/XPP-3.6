@@ -2,7 +2,7 @@
 name = "xpp-lang"
 version = "0.4.1"
 description = "X++ (XPlusPlus) v0.4.1 – pseudocode compiler + native VM (ZCOM/ZITR/ZJIT) + Xite IDE + AI intent fallback"
-authors = [{name="Aagastya Verma", email="aagastyaverma6-sys@github"}]
+authors = [{name="Aagastya Verma", email="aagastyaverma6-sys@users.noreply.github.com"}]
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = ["lark>=1.1.5", "requests>=2.28"]

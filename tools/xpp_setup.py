@@ -42,6 +42,13 @@ def sh(cmd, cwd=None, check=False, env=None, echo=True):
     if echo:
         print("  $ " + (" ".join(cmd) if isinstance(cmd, list) else cmd))
     try:
+        if IS_WIN and isinstance(cmd, list):
+            # Use cmd.exe /c with a fully quoted command line so paths that
+            # contain spaces or parentheses (e.g. "AAV (Aagastya Verma)")
+            # are handled correctly.
+            cmdline = subprocess.list2cmdline(cmd)
+            return subprocess.run(cmdline, cwd=cwd, env=env, shell=True,
+                                  capture_output=False, text=True)
         return subprocess.run(cmd, cwd=cwd, env=env, shell=isinstance(cmd, str),
                               capture_output=False, text=True)
     except FileNotFoundError as e:
@@ -290,6 +297,27 @@ def vscode_user_dir():
     return HOME / ".config/Code/User"
 
 
+def vscode_extensions_dir():
+    return HOME / ".vscode" / "extensions"
+
+
+def install_vscode_extension_by_copy():
+    """Copy the bundled X++ VS Code extension into the user extensions dir."""
+    ext_dir = vscode_extensions_dir() / "atom-software.xpp-lang-0.4.1"
+    if not VSCODE_EXT.exists():
+        warn(f"X++ extension folder missing: {VSCODE_EXT}")
+        return False
+    try:
+        if ext_dir.exists():
+            shutil.rmtree(ext_dir, ignore_errors=True)
+        shutil.copytree(VSCODE_EXT, ext_dir)
+        note(f"X++ extension copied to {ext_dir}")
+        return True
+    except OSError as e:
+        warn(f"could not copy X++ extension: {e}")
+        return False
+
+
 def install_vscode():
     banner("VS Code integration (file icons + run button)")
     code = find_code()
@@ -298,12 +326,13 @@ def install_vscode():
              "picked up automatically when VS Code is installed later "
              "(rerun setup after installing VS Code).")
         return
-    # extension folder (contains package.json, icon theme, grammar)
-    r = sh([code, "--install-extension", str(VSCODE_EXT), "--force"])
-    if r is None or r.returncode != 0:
-        warn("could not install X++ extension")
-        return
-    # Code Runner -> the Run button
+
+    # Local folder extension: `code --install-extension <folder>` is not a
+    # supported input. Copy it into the user extension dir instead (robust
+    # even when the path contains spaces / parentheses).
+    install_vscode_extension_by_copy()
+
+    # Code Runner -> the Run button (marketplace ID, not a folder)
     r = sh([code, "--install-extension", "formulahendry.code-runner", "--force"])
     if r is None or r.returncode != 0:
         warn("could not install Code Runner (Run button) - rerun later or "
@@ -324,7 +353,7 @@ def install_vscode():
     data.setdefault("code-runner.executorMap", {})[".xp"] = "x run \"$fullFileName\""
     data["code-runner.runInTerminal"] = True
     settings.write_text(json.dumps(data, indent=2), encoding="utf-8")
-    note("VS Code extension installed: syntax highlighting, X++ file icons, "
+    note("VS Code integration updated: syntax highlighting, X++ file icons, "
          "Run button (Code Runner). Restart VS Code to see the icons.")
 
 

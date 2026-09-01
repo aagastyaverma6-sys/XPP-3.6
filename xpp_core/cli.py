@@ -42,7 +42,7 @@ def native_binary():
 def build_native(verbose=False):
     """Build xppvm on first use so `x run` always just works."""
     if verbose:
-        print("[Z] no xppvm found – building native VM...", file=sys.stderr)
+        print("[Z] no xppvm found - building native VM...", file=sys.stderr)
     try:
         if os.name == "nt":
             # Invoke through cmd.exe /c and let subprocess quote the path, so
@@ -120,7 +120,7 @@ def strip_header_directives(src: str):
 def main():
     ap = argparse.ArgumentParser(
         prog="x",
-        description=f"X++ v{__version__} – strict pseudocode compiler + native VM + AI",
+        description=f"X++ v{__version__} - strict pseudocode compiler + native VM + AI",
     )
     ap.add_argument("cmd", nargs="?", default="run",
                     help="run | compile | disasm | transpile | check | version")
@@ -141,12 +141,12 @@ def main():
 
     if args.cmd in ("version", "--version", "-V"):
         print(f"X++ Engine v{__version__}")
-        print("  ZCOM – native bytecode AOT compiler   (CLI: xppvm)")
-        print("  ZITR – native VM interpreter          (default when xppvm exists)")
-        print("  ZJIT – native AOT backend (C++ -> machine code)")
-        print("  XCOM – legacy strict AOT (Python bytecode)")
-        print("  XITR – legacy fast VM (Python exec)")
-        print("  ITR  – AI intent compiler (LLM)")
+        print("  ZCOM - native bytecode AOT compiler   (CLI: xppvm)")
+        print("  ZITR - native VM interpreter          (default when xppvm exists)")
+        print("  ZJIT - native AOT backend (C++ -> machine code)")
+        print("  XCOM - legacy strict AOT (Python bytecode)")
+        print("  XITR - legacy fast VM (Python exec)")
+        print("  ITR  - AI intent compiler (LLM)")
         return 0
     if args.cmd in ("disasm", "zcom", "zitr", "zjit"):
         rc = run_native(args, args.cmd, args.file)
@@ -187,26 +187,55 @@ def main():
             if args.strict_ast:
                 from .ast_parser import parse
                 parse(src_strict)
-                print("OK – AST valid")
+                print("OK - AST valid")
             else:
                 from .fast_transpiler import compile_src
                 compile_src(src_strict)
-                print("OK – compiles")
+                print("OK - compiles")
             return 0
 
         # ------------------------------ native modes
         if mode in (RNM_ZCOM, RNM_ZITR, RNM_ZJIT):
             if mode == RNM_ZCOM:
                 rc = run_native(args, "zcom", args.file)
-                if rc is not None and args.cmd == "run":
+                if rc is None:
+                    if args.cmd == "run":
+                        print("Native xppvm unavailable - falling back to legacy XITR.",
+                              file=sys.stderr)
+                        mode = RNM_XITR
+                    else:
+                        return 2
+                elif args.cmd == "run":
                     rc = run_native(args, "zitr", args.file)
-                return rc if rc is not None else 2
-            if mode == RNM_ZITR:
+                if rc is not None:
+                    return rc
+                if args.cmd != "run":
+                    return 2
+                print("Native xppvm unavailable - falling back to legacy XITR.",
+                      file=sys.stderr)
+                mode = RNM_XITR
+            elif mode == RNM_ZITR:
                 rc = run_native(args, "zitr", args.file)
-                return rc if rc is not None else 2
-            if mode == RNM_ZJIT:
+                if rc is None:
+                    if args.cmd == "run":
+                        print("Native xppvm unavailable - falling back to legacy XITR.",
+                              file=sys.stderr)
+                        mode = RNM_XITR
+                    else:
+                        return 2
+                else:
+                    return rc
+            elif mode == RNM_ZJIT:
                 rc = run_native(args, "zjit", args.file)
-                return rc if rc is not None else 2
+                if rc is None:
+                    if args.cmd == "run":
+                        print("Native xppvm unavailable - falling back to legacy XITR.",
+                              file=sys.stderr)
+                        mode = RNM_XITR
+                    else:
+                        return 2
+                else:
+                    return rc
 
         # ------------------------------ legacy strict (kept for compat)
         if mode == RNM_XCOM or args.cmd == "compile":
@@ -218,7 +247,7 @@ def main():
             if args.verbose:
                 print(py, file=sys.stderr)
             if args.cmd == "compile":
-                print(f"XCOM OK – {len(py)} chars Python, "
+                print(f"XCOM OK - {len(py)} chars Python, "
                       f"{len(code.co_code)} bytes bytecode")
                 if args.bench:
                     print(f"compile: {(time.perf_counter()-t0)*1000:.2f} ms",
