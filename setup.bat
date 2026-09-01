@@ -60,12 +60,13 @@ where code >nul 2>&1 && set "CODE_CMD=code"
 if not defined CODE_CMD if exist "%LOCALAPPDATA%\Programs\Microsoft VS Code\bin\code.cmd" set "CODE_CMD=%LOCALAPPDATA%\Programs\Microsoft VS Code\bin\code.cmd"
 if not defined CODE_CMD if exist "%ProgramFiles%\Microsoft VS Code\bin\code.cmd" set "CODE_CMD=%ProgramFiles%\Microsoft VS Code\bin\code.cmd"
 
-if not defined CODE_CMD (
-  echo  [X++] VS Code not found - installing via winget...
-  winget install -e --id Microsoft.VisualStudioCode --accept-package-agreements --accept-source-agreements >nul 2>&1
-  if exist "%LOCALAPPDATA%\Programs\Microsoft VS Code\bin\code.cmd" set "CODE_CMD=%LOCALAPPDATA%\Programs\Microsoft VS Code\bin\code.cmd"
-)
-if defined CODE_CMD (echo  [+] VS Code: %CODE_CMD%) else (echo  [i] VS Code later? Just rerun setup after installing it.)
+if defined CODE_CMD goto code_done
+echo  [X++] VS Code not found - installing via winget...
+winget install -e --id Microsoft.VisualStudioCode --accept-package-agreements --accept-source-agreements >nul 2>&1
+if exist "%LOCALAPPDATA%\Programs\Microsoft VS Code\bin\code.cmd" set "CODE_CMD=%LOCALAPPDATA%\Programs\Microsoft VS Code\bin\code.cmd"
+:code_done
+if defined CODE_CMD echo  [+] VS Code: %CODE_CMD%
+if not defined CODE_CMD echo  [i] VS Code later? Just rerun setup after installing it.
 
 rem ------------------------------------------------------------
 rem  3) C++ COMPILER (g++ - only needed for xppvm/ZJIT)
@@ -77,16 +78,21 @@ where g++ >nul 2>&1 && set "GXX=g++"
 if not defined GXX if exist "C:\msys64\mingw64\bin\g++.exe" set "GXX=C:\msys64\mingw64\bin\g++.exe"
 if not defined GXX if exist "C:\MinGW\bin\g++.exe" set "GXX=C:\MinGW\bin\g++.exe"
 
-if not defined GXX (
-  echo  [X++] Installing MinGW-w64 g++ via MSYS2 (winget)...
-  winget install -e --id MSYS2.MSYS2 --accept-package-agreements --accept-source-agreements >nul 2>&1
-  if exist "C:\msys64\usr\bin\bash.exe" (
-    echo  [X++] Installing gcc package inside MSYS2 (one time, may take a bit)...
-    "C:\msys64\usr\bin\bash.exe" -lc "pacman -Sy --needed --noconfirm mingw-w64-x86_64-gcc" >nul 2>&1
-    if exist "C:\msys64\mingw64\bin\g++.exe" set "GXX=C:\msys64\mingw64\bin\g++.exe"
-  )
-)
-if defined GXX (echo  [+] g++: %GXX%) else (echo  [i] no g++ yet - XCOM/XITR still work; ZJIT needs it.)
+if defined GXX goto gxx_done
+echo  [X++] Installing MinGW-w64 g++ via MSYS2 (winget)...
+winget install -e --id MSYS2.MSYS2 --accept-package-agreements --accept-source-agreements >nul 2>&1
+if exist "C:\msys64\usr\bin\bash.exe" goto install_msys_gcc
+goto gxx_done
+
+:install_msys_gcc
+echo  [X++] Installing gcc package inside MSYS2 (one time, may take a bit)...
+"C:\msys64\usr\bin\bash.exe" -lc "pacman -Sy --needed --noconfirm mingw-w64-x86_64-gcc" >nul 2>&1
+if exist "C:\msys64\mingw64\bin\g++.exe" set "GXX=C:\msys64\mingw64\bin\g++.exe"
+goto gxx_done
+
+:gxx_done
+if defined GXX echo  [+] g++: %GXX%
+if not defined GXX echo  [i] no g++ yet - XCOM/XITR still work; ZJIT needs it.
 
 rem ------------------------------------------------------------
 rem  4) RUN THE UNIVERSAL SETUP (builds VM, installs everything,
