@@ -93,6 +93,34 @@ x run hello.xp
 > Optional AI mode (`RNM=ITR`) needs an OpenRouter key:
 > `export OPENROUTER_API_KEY=...` then `x run ai_demo.xp --mode ITR`.
 
+## Wipe old X++ / full uninstall
+
+If you have an older X++ release installed, clean it before installing v0.4.1.
+The repo ships a safety-first uninstaller that finds the real install artifacts
+(pip package, `x` shim, `xppvm`, VS Code extension, OS file icons, PATH blocks,
+registry entries) instead of blindly matching every file named `x`.
+
+**Linux / macOS:**
+```bash
+./uninstall.sh                     # dry-run: lists what it would remove
+./uninstall.sh --yes               # remove known X++ installs
+./uninstall.sh --yes --deep        # also scan XPP/Xite-named install dirs
+./uninstall.sh --yes --deep --full # scan the whole filesystem (slow)
+```
+
+**Windows:**
+```bat
+uninstall.bat                     :: dry-run
+uninstall.bat --yes               :: remove known X++ installs
+uninstall.bat --yes --deep        :: also scan XPP/Xite-named dirs
+uninstall.bat --yes --deep --full :: scan whole system (slow)
+```
+
+The uninstaller never touches `.xp` source programs and never deletes the repo
+folder that contains it. **Run it in dry-run first, read the list, then add
+`--yes`.** After it finishes, restart your terminal and install v0.4.1 from a
+fresh folder.
+
 ## Build the VM by hand (optional)
 
 ```
